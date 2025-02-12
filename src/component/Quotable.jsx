@@ -1,7 +1,7 @@
 // src/components/Quotable.jsx
 // TODO: Import the necessary hooks from React.
 import "./quote.css"; // Ensure you have your CSS set up for styling
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 function Quotable() {
   // Step 1: Initialize state variables.
@@ -30,13 +30,23 @@ function Quotable() {
     try {
       // TODO: Make a GET request to the ZenQuotes API using a CORS proxy.
       // Hint: Use the fetch() method with the URL "https://cors-anywhere.herokuapp.com/https://zenquotes.io/api/random".
-      const response = await fetch("https://cors-anywhere.herokuapp.com/https://zenquotes.io/api/random");
+      const response = await fetch(
+        `https://thingproxy.freeboard.io/fetch/https://zenquotes.io/api/random`
+      );
+      
 
       // TODO: Check if the response is OK (i.e., response.ok === true).
       // Hint: If response.ok is false, throw an error with a message (e.g., "Failed to fetch quote").
-      if (response.ok === false){
+      if (!response.ok){
         throw new Error ("Failed to fetch quote");
       }
+
+      const data = await response.json();
+
+      console.log(data);
+
+      // Update state with the new quote
+      setQuotes(quotes => [...quotes, ...data]); 
       
     } catch (err) {
       // TODO: Update the error state with the error message.
@@ -60,7 +70,7 @@ function Quotable() {
   // - Use the filter() method to remove the quote at the given index.
   const deleteQuote = (indexToDelete) => {
     // TODO: Update the quotes state by filtering out the quote at indexToDelete.
-    setQuotes(quotes.filter((quote, index) => index !== indexToRemove));
+    setQuotes(quotes.filter((_, index) => index !== indexToDelete));
   };
 
   return (
@@ -68,7 +78,6 @@ function Quotable() {
       <h1 className="title">Random Quote Generator</h1>
 
       {/* Step 5: Render a button to fetch a new quote */}
-      {/* TODO: Attach the updateQuote function to the onClick event of this button */}
       <button className="btn1" onClick={updateQuote}>
         New Quote
       </button>
@@ -84,14 +93,12 @@ function Quotable() {
         ) : (
           quotes.map((quote, index) => (
             <div key={quote._id ? quote._id : index} className="quote-card">
-              {/* TODO: Display the quote content (e.g., quote.q) */}
+              {/* Display the quote content */}
               <p className="quote-content">{quote.q}</p>
-              {/* TODO: Conditionally display the author if available (e.g., quote.a) */}
-              {quote.a && (
-                <p className="quote-author">— {quote.a}</p>
-              )}
-              {/* TODO: Attach the deleteQuote function to the onClick event of this button, passing the current index */}
-              <button className="delete-btn" onClick={deleteQuote}>
+              {/* Conditionally display the author if available */}
+              {quote.a && <p className="quote-author">— {quote.a}</p>}
+              {/* Attach the deleteQuote function to the onClick event of this button */}
+              <button className="delete-btn" onClick={() => deleteQuote(index)}>
                 Delete Quote
               </button>
             </div>
